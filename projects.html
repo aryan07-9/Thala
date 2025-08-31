@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bunky's Projects</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #141e30, #243b55);
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      text-align: center;
+      background-size: 400% 400%;
+      animation: gradientFlow 15s ease infinite;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #00ffff;
+      font-size: 36px;
+      animation: fadeIn 1.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .project {
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      margin: 20px auto;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.1);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      max-width: 600px;
+    }
+
+    .project:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+    }
+
+    .project h2 {
+      color: #ffcc00;
+      margin-bottom: 10px;
+    }
+
+    .project p {
+      font-size: 16px;
+      color: #ddd;
+    }
+
+    a {
+      color: cyan;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      color: #ffcc00;
+    }
+
+    .btn-back {
+      margin-top: 30px;
+      display: inline-block;
+      background-color: cyan;
+      color: black;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+      background-color: #ffcc00;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>💼 My Cool Projects</h1>
+
+    <div class="project">
+      <h2>🌐 Personal Portfolio Website</h2>
+      <p>HTML + CSS se banaya gaya mera pehla professional portfolio website.</p>
+      <a href="index.html">Live Demo 🔗</a>
+    </div>
+
+    <div class="project">
+      <h2>🎮 Mini JavaScript Game</h2>
+      <p>Ek simple fun game jo JavaScript se banaya gaya hai. Try it now!</p>
+      <a href="game.html" target="_blank">Play Game 🎯</a>
+    </div>
+
+    <div class="project">
+      <h2>📸 SayCheese Clone (Testing)</h2>
+      <p>Termux aur camera hack ka test clone — only for education!</p>
+    </div>
+
+    <!-- ✅ NEW: Notes Project Added -->
+    <div class="project">
+      <h2>📚 Notes (Download Section)</h2>
+      <p>Best books ka pdf hai . Try now!</p>
+      <a href="https://tpi.li/Bunky" target="_blank">📥 Download Notes</a>
+    </div>
+
+    <a class="btn-back" href="index.html">🔙 Back to Home</a>
+  </div>
+
+</body>
+</html>

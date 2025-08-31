@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>🎯 Mini Game - Click the Box</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 50px;
+    }
+    #box {
+      width: 100px;
+      height: 100px;
+      background: red;
+      position: absolute;
+      display: none;
+      border-radius: 10px;
+    }
+    #score {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: cyan;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎯 Click the Red Box</h1>
+  <p id="score">Score: 0</p>
+  <button onclick="startGame()">Start Game</button>
+  <div id="box" onclick="hitBox()"></div>
+
+  <script>
+    let score = 0;
+    let box = document.getElementById('box');
+
+    function randomPosition() {
+      let x = Math.floor(Math.random() * (window.innerWidth - 100));
+      let y = Math.floor(Math.random() * (window.innerHeight - 100));
+      box.style.left = x + "px";
+      box.style.top = y + "px";
+    }
+
+    function startGame() {
+      score = 0;
+      document.getElementById("score").innerText = "Score: 0";
+      box.style.display = "block";
+      moveBox();
+    }
+
+    function moveBox() {
+      randomPosition();
+      setTimeout(() => {
+        if (score >= 10) {
+          alert("🎉 Game Over! Your Score: " + score);
+          box.style.display = "none";
+        } else {
+          moveBox();
+        }
+      }, 800);
+    }
+
+    function hitBox() {
+      score++;
+      document.getElementById("score").innerText = "Score: " + score;
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bunky | Login & Signup</title>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      background: #0f2027;
+    }
+
+    /* Particle Background */
+    #particles-js {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    .wrapper {
+      position: relative;
+      width: 380px;
+      height: 500px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 25px rgba(0,0,0,0.5);
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .wrapper .form-box {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 40px;
+      transition: transform 0.6s ease;
+    }
+
+    .wrapper .form-box.login {
+      transform: translateX(0);
+    }
+
+    .wrapper.active .form-box.login {
+      transform: translateX(-100%);
+    }
+
+    .wrapper .form-box.register {
+      transform: translateX(100%);
+    }
+
+    .wrapper.active .form-box.register {
+      transform: translateX(0);
+    }
+
+    h2 {
+      font-size: 2em;
+      text-align: center;
+      color: #fff;
+    }
+
+    .input-box {
+      position: relative;
+      width: 100%;
+      height: 50px;
+      margin: 30px 0;
+      border-bottom: 2px solid #fff;
+    }
+
+    .input-box input {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 1em;
+      color: #fff;
+      padding: 0 35px 0 5px;
+    }
+
+    .input-box label {
+      position: absolute;
+      left: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #ccc;
+      font-size: 1em;
+      pointer-events: none;
+      transition: 0.3s ease;
+    }
+
+    .input-box input:focus ~ label,
+    .input-box input:valid ~ label {
+      top: -5px;
+      font-size: 0.8em;
+      color: cyan;
+    }
+
+    .input-box i {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2em;
+      color: #fff;
+    }
+
+    .btn {
+      width: 100%;
+      height: 45px;
+      background: cyan;
+      border: none;
+      outline: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #ffcc00;
+    }
+
+    .login-register {
+      font-size: 0.9em;
+      color: #fff;
+      text-align: center;
+      margin: 20px 0 10px;
+    }
+
+    .login-register a {
+      color: cyan;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .login-register a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Particles -->
+  <div id="particles-js"></div>
+
+  <div class="wrapper" id="wrapper">
+    <!-- Login Form -->
+    <div class="form-box login">
+      <h2>Login</h2>
+      <form>
+        <div class="input-box">
+          <input type="text" required>
+          <label>Username</label>
+          <i class='bx bxs-user'></i>
+        </div>
+        <div class="input-box">
+          <input type="password" required>
+          <label>Password</label>
+          <i class='bx bxs-lock-alt'></i>
+        </div>
+        <button type="submit" class="btn">Login</button>
+        <div class="login-register">
+          <p>Don't have an account? <a href="#" onclick="toggleForm()">Register</a></p>
+        </div>
+      </form>
+    </div>
+
+    <!-- Register Form -->
+    <div class="form-box register">
+      <h2>Register</h2>
+      <form>
+        <div class="input-box">
+          <input type="text" required>
+          <label>Username</label>
+          <i class='bx bxs-user'></i>
+        </div>
+        <div class="input-box">
+          <input type="email" required>
+          <label>Email</label>
+          <i class='bx bxs-envelope'></i>
+        </div>
+        <div class="input-box">
+          <input type="password" required>
+          <label>Password</label>
+          <i class='bx bxs-lock-alt'></i>
+        </div>
+        <button type="submit" class="btn">Register</button>
+        <div class="login-register">
+          <p>Already have an account? <a href="#" onclick="toggleForm()">Login</a></p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function toggleForm() {
+      document.getElementById('wrapper').classList.toggle('active');
+    }
+  </script>
+
+  <!-- Particles.js CDN -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    particlesJS("particles-js", {
+      "particles": {
+        "number": { "value": 80 },
+        "color": { "value": "#00ffff" },
+        "shape": { "type": "circle" },
+        "opacity": { "value": 0.5 },
+        "size": { "value": 3 },
+        "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.4, "width": 1 },
+        "move": { "enable": true, "speed": 3 }
+      },
+      "interactivity": {
+        "events": { "onhover": { "enable": true, "mode": "repulse" } }
+      },
+      "retina_detect": true
+    });
+  </script>
+</body>
+</html>
