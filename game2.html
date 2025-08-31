@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Space Dodger — Bunky Game</title>
+<style>
+  :root{
+    --bg1:#071028; --bg2:#001429; --accent:#00ffd5; --danger:#ff4d4d;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Poppins',sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#e6f7f3}
+  .wrap{max-width:900px;margin:18px auto;padding:14px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+  h1{font-size:18px;margin:0;color:var(--accent)}
+  .top-controls{display:flex;gap:8px;align-items:center}
+  .btn{background:var(--accent);color:#001;padding:8px 12px;border-radius:8px;text-decoration:none;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+  .small{font-size:13px;color:#a9d9d3}
+  #gameBox{position:relative;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at 20% 10%, rgba(0,255,213,0.06), transparent), linear-gradient(180deg, rgba(255,255,255,0.02), transparent);box-shadow:0 10px 40px rgba(0,0,0,.6)}
+  canvas{display:block;width:100%;height:auto}
+  .hud{position:absolute;left:12px;top:12px;background:rgba(0,0,0,0.35);backdrop-filter:blur(4px);padding:8px 10px;border-radius:8px;font-weight:700}
+  .hud.right{left:auto;right:12px}
+  .overlay{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+  .panel{background:rgba(0,0,0,0.6);padding:18px;border-radius:12px;text-align:center;pointer-events:auto}
+  .big{font-size:20px;color:var(--accent);margin-bottom:8px}
+  .muted{color:#b2e9e3;font-size:14px}
+  footer{margin-top:12px;color:#9ccfca;font-size:13px;text-align:center}
+  @media (max-width:420px){h1{font-size:16px}.btn{padding:8px 10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎮 Space Dodger — Bunky Game</h1>
+    <div class="top-controls">
+      <a class="btn" href="index.html">⤺ Home</a>
+      <div class="small">Use ← → or tap left/right</div>
+    </div>
+  </header>
+
+  <div id="gameBox">
+    <canvas id="game"></canvas>
+
+    <div class="hud" id="scoreHUD">Score: 0</div>
+    <div class="hud right" id="bestHUD">High: 0</div>
+
+    <div class="overlay" id="overlay">
+      <div class="panel" id="startPanel">
+        <div class="big">Space Dodger</div>
+        <div class="muted">Move your ship, avoid asteroids. Tap to start.</div>
+        <div style="height:12px"></div>
+        <button class="btn" id="startBtn">Start Game</button>
+      </div>
+      <div class="panel" id="deadPanel" style="display:none">
+        <div class="big" id="finalScore">You scored 0</div>
+        <div class="muted" id="finalMsg">Nice try! Want again?</div>
+        <div style="height:10px"></div>
+        <button class="btn" id="retryBtn">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>Made with 💖 • Mobile friendly • No downloads</footer>
+</div>
+
+<script>
+/*
+  Space Dodger
+  - Canvas game: move ship left/right, avoid falling asteroids
+  - Controls: Arrow keys or tap left/right on canvas (mobile)
+  - Highscore saved in localStorage
+*/
+
+// Canvas setup (use devicePixelRatio for crispness)
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+let DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+function resizeCanvas(){
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = Math.floor(rect.width * DPR);
+  canvas.height = Math.floor(rect.width * 16/9 * DPR); // maintain 16:9 visual
+  canvas.style.height = (rect.width * 16/9) + 'px';
+}
+function fitCanvasToContainer(){
+  const container = document.getElementById('gameBox');
+  const width = Math.min(window.innerWidth - 40, 900);
+  canvas.style.width = width + 'px';
+  resizeCanvas();
+}
+window.addEventListener('resize', ()=>{ fitCanvasToContainer(); });
+fitCanvasToContainer();
+
+// Game state
+let running = false;
+let score = 0;
+let best = parseInt(localStorage.getItem('space_best')||'0',10);
+document.getElementById('bestHUD').textContent = "High: " + best;
+document.getElementById('scoreHUD').textContent = "Score: 0";
+
+const ship = {
+  w: 48, h: 32,
+  x: 0, y: 0,
+  speed: 6
+};
+
+const asteroids = [];
+let spawnTimer = 0;
+let spawnInterval = 80; // frames
+let gameSpeed = 1.0;
+
+// helpers
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+// start/reset
+function startGame(){
+  running = true;
+  score = 0;
+  asteroids.length = 0;
+  spawnTimer = 0;
+  spawnInterval = 70;
+  gameSpeed = 1.0;
+  // place ship center bottom
+  ship.x = canvas.width/2 - ship.w/2;
+  ship.y = canvas.height - ship.h - 30;
+  document.getElementById('startPanel').style.display = 'none';
+  document.getElementById('deadPanel').style.display = 'none';
+  document.getElementById('overlay').style.pointerEvents = 'none';
+  loop(); // start loop
+}
+
+// draw starry background
+function drawBackground(){
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = "#00151f";
+  ctx.fillRect(0,0,w,h);
+  // moving stars (simple parallax based on score)
+  for(let i=0;i<40;i++){
+    const size = (i%5===0?2:1);
+    const x = (i*73 + (score*1.5))%w;
+    const y = (i*97)%h;
+    ctx.fillStyle = "rgba(255,255,255,"+(0.04+ (i%7)/60)+")";
+    ctx.fillRect(x,y, size, size);
+  }
+}
+
+// draw ship
+function drawShip(){
+  const x = ship.x, y = ship.y, w = ship.w, h = ship.h;
+  // body
+  ctx.fillStyle = '#00ffd5';
+  roundRect(ctx, x, y, w, h, 6, true, false);
+  // cockpit
+  ctx.fillStyle = '#00323a';
+  roundRect(ctx, x + w*0.45, y+4, w*0.25, h*0.5, 4, true, false);
+}
+
+// utility for rounded rect
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  if (typeof r==='undefined') r=5;
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+  if(fill) ctx.fill();
+  if(stroke) ctx.stroke();
+}
+
+// asteroid spawn
+function spawnAsteroid(){
+  const size = rand(18,46)*DPR;
+  const x = rand(20, canvas.width - 20 - size);
+  const speed = rand(1.2, 2.6) * DPR * gameSpeed;
+  asteroids.push({x, y:-size, size, speed, angle: rand(0,Math.PI*2)});
+}
+
+// update & draw asteroids
+function updateAsteroids(){
+  for(let i=asteroids.length-1;i>=0;i--){
+    const a = asteroids[i];
+    a.y += a.speed;
+    a.angle += 0.02;
+    // draw
+    ctx.save();
+    ctx.translate(a.x + a.size/2, a.y + a.size/2);
+    ctx.rotate(Math.sin(a.angle)*0.6);
+    ctx.fillStyle = "#9b7a52";
+    ctx.beginPath();
+    ctx.arc(0,0,a.size/2,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+    // offscreen remove
+    if(a.y - a.size > canvas.height + 40) asteroids.splice(i,1);
+  }
+}
+
+// collision check
+function checkCollision(){
+  for(const a of asteroids){
+    const ax = a.x + a.size/2, ay = a.y + a.size/2;
+    const sx = ship.x + ship.w/2, sy = ship.y + ship.h/2;
+    const dist = Math.hypot(ax - sx, ay - sy);
+    if(dist < (a.size/2 + Math.max(ship.w, ship.h)/2 * 0.7)) return true;
+  }
+  return false;
+}
+
+// input
+let moveDir = 0; // -1 left, 1 right
+window.addEventListener('keydown', e=>{
+  if(e.key === "ArrowLeft") moveDir = -1;
+  if(e.key === "ArrowRight") moveDir = 1;
+});
+window.addEventListener('keyup', e=>{
+  if(e.key === "ArrowLeft" || e.key === "ArrowRight") moveDir = 0;
+});
+
+// touch: split canvas into left/right tap zones
+canvas.addEventListener('touchstart', function(e){
+  const rect = canvas.getBoundingClientRect();
+  const x = e.touches[0].clientX - rect.left;
+  if(x < rect.width/2) moveDir = -1; else moveDir = 1;
+});
+canvas.addEventListener('touchend', function(){ moveDir = 0; });
+
+// main loop (uses requestAnimationFrame)
+let lastFrame = 0;
+function loop(ts){
+  if(!running) return;
+  if(!ts) ts = performance.now();
+  const dt = Math.min((ts - lastFrame)/16, 4);
+  lastFrame = ts;
+
+  // update ship
+  ship.x += moveDir * ship.speed * DPR * dt;
+  ship.x = clamp(ship.x, 8, canvas.width - ship.w - 8);
+
+  // spawn logic
+  spawnTimer++;
+  if(spawnTimer > spawnInterval){
+    spawnTimer = 0;
+    spawnInterval = Math.max(28, Math.floor(70 - score*0.2)); // get harder
+    spawnAsteroid();
+  }
+
+  // increase game speed gradually
+  gameSpeed = 1 + score * 0.005;
+
+  // score increment
+  score += 0.02 * gameSpeed * dt;
+  const displayScore = Math.floor(score);
+  document.getElementById('scoreHUD').textContent = "Score: " + displayScore;
+
+  // draw
+  drawBackground();
+  drawShip();
+  updateAsteroids();
+
+  // collision
+  if(checkCollision()){
+    endGame();
+    return;
+  }
+
+  // request frame
+  requestAnimationFrame(loop);
+}
+
+// end game
+function endGame(){
+  running = false;
+  const final = Math.floor(score);
+  if(final > best){ best = final; localStorage.setItem('space_best', best); document.getElementById('bestHUD').textContent = "High: " + best; }
+  // show overlay
+  document.getElementById('finalScore').textContent = "You scored " + final;
+  document.getElementById('startPanel').style.display = 'none';
+  document.getElementById('deadPanel').style.display = 'block';
+  document.getElementById('overlay').style.pointerEvents = 'auto';
+}
+
+// start/retry buttons
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('retryBtn').addEventListener('click', ()=>{
+  document.getElementById('deadPanel').style.display='none';
+  startGame();
+});
+
+// initial placement and draw of static background for first view
+function initialDraw(){
+  ship.w = Math.floor(48 * DPR);
+  ship.h = Math.floor(32 * DPR);
+  ship.x = canvas.width/2 - ship.w/2;
+  ship.y = canvas.height - ship.h - 30*DPR;
+  drawBackground();
+  drawShip();
+}
+initialDraw();
+
+// small helper: fit canvas container height on load
+window.addEventListener('load', ()=>{
+  fitCanvasToContainer();
+  resizeCanvas();
+  initialDraw();
+});
+
+// click-to-start on canvas overlay
+canvas.addEventListener('click', ()=>{
+  if(!running){
+    startGame();
+  }
+});
+
+// make sure canvas container measured correctly
+setTimeout(()=>{ fitCanvasToContainer(); resizeCanvas(); initialDraw(); }, 200);
+
+// expose simple debug
+window.__space_d = { restart: startGame };
+</script>
+</body>
+</html>

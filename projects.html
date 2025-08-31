@@ -88,6 +88,26 @@
       background-color: #ffcc00;
       transform: scale(1.05);
     }
+
+    /* ✅ Special Button Style */
+    .btn-special {
+      display: inline-block;
+      margin-top: 15px;
+      background: linear-gradient(45deg, #00ffff, #ff00ff);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 0 15px rgba(0,255,255,0.6);
+      transition: all 0.3s ease-in-out;
+    }
+
+    .btn-special:hover {
+      background: linear-gradient(45deg, #ffcc00, #ff00ff);
+      transform: scale(1.1);
+      box-shadow: 0 0 25px rgba(255, 204, 0, 0.8);
+    }
   </style>
 </head>
 <body>
@@ -112,11 +132,17 @@
       <p>Termux aur camera hack ka test clone — only for education!</p>
     </div>
 
-    <!-- ✅ NEW: Notes Project Added -->
     <div class="project">
       <h2>📚 Notes (Download Section)</h2>
       <p>Best books ka pdf hai . Try now!</p>
       <a href="https://tpi.li/Bunky" target="_blank">📥 Download Notes</a>
+    </div>
+
+    <!-- ✅ NEW Project with Button -->
+    <div class="project">
+      <h2>🤖(Cool game)</h2>
+      <p>Ek interactive chatbot jisme tum maze le sakte ho.</p>
+      <a href="game2.html" class="btn-special">✨ Try Chatbot</a>
     </div>
 
     <a class="btn-back" href="index.html">🔙 Back to Home</a>
